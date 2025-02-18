@@ -1,0 +1,372 @@
+import {VerticalBox, ProgressIndicator, HorizontalBox } from "std-widgets.slint";
+import "../Roboto.ttf";
+
+component Button {
+    in property <string> text: "";
+    in property <bool> enabled: true;
+    in property <length> font-size: 12px;
+    in property <string> font-family;
+    in property <int> font-weight: 400;
+    in property <color> text-color;
+    in property <color> primary-color: #ffffff;
+    in property <color> secondary-color: #000000;
+    in property <color> disabled-color: #888888;
+    in property <length> border-top-left-radius: 0px;
+    in property <length> border-top-right-radius: 0px;
+    in property <length> border-bottom-left-radius: 0px;
+    in property <length> border-bottom-right-radius: 0px;
+    callback clicked();
+    Rectangle {
+        border-top-left-radius: border-top-left-radius;
+        border-top-right-radius: border-top-right-radius;
+        border-bottom-left-radius: border-bottom-left-radius;
+        border-bottom-right-radius: border-bottom-right-radius;
+        background: {
+            if touch-area.enabled {
+                if touch-area.has-hover {
+                    secondary-color
+                } else {
+                    primary-color
+                }
+            } else {
+                disabled-color
+            }
+        }
+        touch-area := TouchArea {
+            enabled: enabled;
+            clicked => {
+                clicked()
+            }
+        }
+
+        Text {
+            vertical-alignment: center;
+            horizontal-alignment: center;
+            text: text;
+            font-size: font-size;
+            font-family: font-family;
+            font-weight: font-weight;
+            color: text-color;
+        }
+    }
+}
+
+component CircularTimer {
+    preferred-height: 100%;
+    preferred-width: 100%;
+    in property <float> progress-percent;
+    in property <length> stroke-width;
+    in property <color> color;
+    in property <string> text;
+    in property <string> font;
+    in property <length> font-size;
+    in property <int> font-weight;
+    in-out property <int> value;
+    callback ticked();
+    private property <angle> progress: (Math.clamp(round(progress-percent * 360) * 1deg, 0deg, 359.999deg));
+    function checkBadValues(value: angle) -> angle {
+        if value == 357deg {
+            return 358deg;
+        } else if value == 356deg {
+            return 358deg;
+        } else if value == 353deg {
+            return 354deg;
+        } else if value == 349deg {
+            return 350deg;
+        } else if value == 348deg {
+            return 350deg;
+        } else if value == 347deg {
+            return 350deg;
+        } else if value == 344deg {
+            return 345deg;
+        } else if value == 339deg {
+            return 340deg;
+        } else if value == 338deg {
+            return 340deg;
+        } else if value == 335deg {
+            return 336deg;
+        } else if value == 331deg {
+            return 332deg;
+        } else if value == 327deg {
+            return 328deg;
+        } else if value == 321deg {
+            return 322deg;
+        } else if value == 319deg {
+            return 320deg;
+        } else if value == 318deg {
+            return 320deg;
+        } else if value == 316deg {
+            return 317deg;
+        } else if value == 298deg {
+            return 299deg;
+        } else if value == 281deg {
+            return 282deg;
+        } else if value == 270deg {
+            return 271deg;
+        } else if value == 219deg {
+            return 220deg;
+        } else if value == 141deg {
+            return 142deg;
+        } else if value == 62deg {
+            return 63deg;
+        } else if value == 46deg {
+            return 47deg;
+        } else if value == 44deg {
+            return 45deg;
+        } else if value == 42deg {
+            return 43deg;
+        } else if value == 41deg {
+            return 43deg;
+        } else if value == 39deg {
+            return 40deg;
+        } else if value == 33deg {
+            return 34deg;
+        } else if value == 29deg {
+            return 30deg;
+        } else if value == 26deg {
+            return 27deg;
+        } else if value == 25deg {
+            return 27deg;
+        } else if value == 24deg {
+            return 27deg;
+        } else if value == 22deg {
+            return 23deg;
+        } else if value == 21deg {
+            return 23deg;
+        } else if value == 16deg {
+            return 17deg;
+        } else if value == 13deg {
+            return 14deg;
+        } else if value == 12deg {
+            return 14deg;
+        } else if value == 11deg {
+            return 14deg;
+        } else if value == 10deg {
+            return 14deg;
+        } else if value == 8deg {
+            return 9deg;
+        } else if value == 7deg {
+            return 9deg;
+        } else if value == 5deg {
+            return 6deg;
+        } else if value == 4deg {
+            return 6deg;
+        } else if value == 3deg {
+            return 6deg;
+        } else {
+            return value;
+        }
+    }
+    Text {
+        text: text;
+        color: #000000;
+        font-family: font;
+        font-size: font-size;
+        font-weight: font-weight;
+    }
+
+    timer := Timer {
+        interval: 1s;
+        triggered() => {
+            ticked()
+        }
+    }
+
+    path := Path {
+        private property <float> radius: 0.5;
+        viewbox-width: 1;
+        viewbox-height: 1;
+        width: 100%;
+        height: 100%;
+        stroke-width: stroke-width;
+        stroke: color;
+        MoveTo {
+            x: 0.5;
+            y: 0;
+        }
+
+        ArcTo {
+            radius-x: path.radius;
+            radius-y: path.radius;
+            x: 0.5 - path.radius * sin(-(checkBadValues(root.progress)));
+            y: 0.5 - path.radius * cos(-(checkBadValues(root.progress)));
+            sweep: root.progress > 0;
+            large-arc: root.progress > 180deg;
+        }
+    }
+}
+
+export component AppWindow inherits Window {
+    in-out property <int> value-eye-timer: 1200;
+    in-out property <string> text-eye-timer;
+    in-out property <float> progress-percent-eye-timer: 1.0;
+    in-out property <int> current-eye-timer-progress-max: 1200;
+    callback ticked-eye-timer(int);
+    in-out property <bool> enabled-eye-snooze-button;
+    in-out property <bool> clicked-eye-snooze-button-var: false;
+    callback clicked-eye-snooze-button();
+    in-out property <bool> enabled-eye-do-button;
+    in-out property <bool> clicked-eye-do-button-var: false;
+    callback clicked-eye-do-button();
+    in-out property <int> value-drink-timer: 1800;
+    in-out property <string> text-drink-timer;
+    in-out property <float> progress-percent-drink-timer: 1.0;
+    in-out property <int> current-drink-timer-progress-max: 1800;
+    callback ticked-drink-timer(int);
+    in-out property <bool> enabled-drink-snooze-button;
+    in-out property <bool> clicked-drink-snooze-button-var: false;
+    callback clicked-drink-snooze-button();
+    in-out property <bool> clicked-drink-do-button-var: false;
+    callback clicked-drink-do-button();
+    background: white;
+    width: 980px;
+    height: 555px;
+    VerticalBox {
+        alignment: center;
+        HorizontalLayout {
+            alignment: center;
+            spacing: 100px;
+            Rectangle {
+                width: 410px;
+                height: 515px;
+                background: #E3F0FF;
+                border-radius: 15px;
+                drop-shadow-color: rgba(0,0,0,0.25);
+                drop-shadow-blur: 4px;
+                drop-shadow-offset-y: 4px;
+                VerticalLayout {
+                    alignment: center;
+                    spacing: 30px;
+                    HorizontalLayout {
+                        alignment: center;
+                        CircularTimer {
+                            text: text-eye-timer;
+                            value: value-eye-timer;
+                            progress-percent: progress-percent-eye-timer;
+                            stroke-width: 30px;
+                            color: #009DFF;
+                            width: 400px;
+                            height: 400px;
+                            font-size: 96px;
+                            font-weight: 300;
+                            ticked() => {
+                                ticked-eye-timer(value-eye-timer)
+                            }
+                        }
+                    }
+
+                    HorizontalLayout {
+                        alignment: center;
+                        spacing: 6px;
+                        Button {
+                            enabled: enabled-eye-do-button;
+                            text: "Look away";
+                            font-family: "Roboto";
+                            font-size: 32px;
+                            text-color: #000000;
+                            primary-color: #009DFF;
+                            secondary-color: #69C6FF;
+                            disabled-color: #AEB0B1;
+                            border-top-left-radius: 12px;
+                            border-bottom-left-radius: 12px;
+                            width: 197px;
+                            height: 75px;
+                            clicked => {
+                                clicked-eye-do-button()
+                            }
+                        }
+
+                        Button {
+                            enabled: enabled-eye-snooze-button;
+                            text: "Snooze for \n15 minutes";
+                            font-family: "Roboto";
+                            font-size: 32px;
+                            text-color: #000000;
+                            primary-color: #009DFF;
+                            secondary-color: #69C6FF;
+                            disabled-color: #AEB0B1;
+                            border-top-right-radius: 12px;
+                            border-bottom-right-radius: 12px;
+                            width: 197px;
+                            height: 75px;
+                            clicked => {
+                                clicked-eye-snooze-button()
+                            }
+                        }
+                    }
+                }
+            }
+
+            Rectangle {
+                width: 410px;
+                height: 515px;
+                background: #E3F0FF;
+                border-radius: 15px;
+                drop-shadow-color: rgba(0,0,0,0.25);
+                drop-shadow-blur: 4px;
+                drop-shadow-offset-y: 4px;
+                VerticalLayout {
+                    alignment: center;
+                    spacing: 30px;
+                    HorizontalLayout {
+                        alignment: center;
+                        CircularTimer {
+                            text: text-drink-timer;
+                            value: value-drink-timer;
+                            progress-percent: progress-percent-drink-timer;
+                            stroke-width: 30px;
+                            color: #009DFF;
+                            width: 400px;
+                            height: 400px;
+                            font-size: 96px;
+                            font-weight: 300;
+                            ticked => {
+                                ticked-drink-timer(value-drink-timer)
+                            }
+                        }
+                    }
+
+                    HorizontalLayout {
+                        alignment: center;
+                        spacing: 6px;
+                        Button {
+                            text: "Have a drink";
+                            font-family: "Roboto";
+                            enabled: true;
+                            font-size: 32px;
+                            text-color: #000000;
+                            primary-color: #009DFF;
+                            secondary-color: #69C6FF;
+                            disabled-color: #AEB0B1;
+                            border-top-left-radius: 12px;
+                            border-bottom-left-radius: 12px;
+                            width: 197px;
+                            height: 75px;
+                            clicked => {
+                                clicked-drink-do-button()
+                            }
+                        }
+
+                        Button {
+                            text: "Snooze for \n15 minutes";
+                            font-family: "Roboto";
+                            enabled: enabled-drink-snooze-button;
+                            font-size: 32px;
+                            text-color: #000000;
+                            primary-color: #009DFF;
+                            secondary-color: #69C6FF;
+                            disabled-color: #AEB0B1;
+                            border-top-right-radius: 12px;
+                            border-bottom-right-radius: 12px;
+                            width: 197px;
+                            height: 75px;
+                            clicked => {
+                                clicked-drink-snooze-button()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

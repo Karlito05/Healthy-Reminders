@@ -1,0 +1,131 @@
+import { Button, VerticalBox, ProgressIndicator } from "std-widgets.slint";
+
+export component AppWindow inherits Window {
+    in-out property <int> drink-timer: 1800;
+    in-out property <int> eye-timer: 1200;
+    in-out property <int> drink-progress-max: 1800;
+    in-out property <int> eye-progress-max: 1200;
+    in-out property <bool> drink-button-clicked: false;
+    in-out property <bool> eye-button-clicked: false;
+    callback eye-logic();
+    callback eye-tick(int, bool);
+    callback drink-logic();
+    callback drink-tick(int, bool);
+    GridLayout {
+        property <string> drinkTimerMin: "30";
+        property <string> drinkTimerSec: "00";
+        property <string> eyeTimerMin: "20";
+        property <string> eyeTimerSec: "00";
+        spacing-horizontal: 100px;
+        spacing-vertical: 35px;
+        Row {
+            Text {
+                text: "20/20/20 Rule Timer";
+                font-size: 48pt;
+            }
+
+            Text {
+                text: "Drinking reminder Timer";
+                font-size: 48pt;
+            }
+        }
+
+        Row {
+            ProgressIndicator {
+                progress: root.eye-timer / root.eye-progress-max;
+                height: 35px;
+            }
+
+            ProgressIndicator {
+                progress: root.drink-timer / root.drink-progress-max;
+                height: 35px;
+            }
+        }
+
+        Row {
+            Timer {
+                running: true;
+                interval: 1s;
+                triggered() => {
+                    if root.eye-timer == 0 {
+                        self.running = false
+                    } else {
+                        root.eye-timer -= 1
+                    }
+                    if (root.eye-timer - Math.mod(root.eye-timer, 60)) / 60 == 0 {
+                        eyeTimerMin = "00"
+                    } else if (root.eye-timer - Math.mod(root.eye-timer, 60)) / 60 <= 9 {
+                        eyeTimerMin = "0\{(root.eye-timer - Math.mod(root.eye-timer, 60)) / 60}"
+                    } else {
+                        eyeTimerMin = (root.eye-timer - Math.mod(root.eye-timer, 60)) / 60
+                    }
+                    if Math.mod(root.eye-timer, 60) <= 9 {
+                        eyeTimerSec = "0\{Math.mod(root.eye-timer, 60)}"
+                    } else {
+                        eyeTimerSec = Math.mod(root.eye-timer, 60)
+                    }
+                    eye-tick(root.eye-timer, root.eye-button-clicked)
+                }
+            }
+
+            Text {
+                text: "\{eyeTimerMin} : \{eyeTimerSec}";
+                font-size: 36pt;
+                horizontal-alignment: center;
+            }
+
+            Timer {
+                running: true;
+                interval: 1s;
+                triggered() => {
+                    if root.drink-timer == 0 {
+                        self.running = false
+                    } else {
+                        root.drink-timer -= 1
+                    }
+                    if (root.drink-timer - Math.mod(root.drink-timer, 60)) / 60 == 0 {
+                        drinkTimerMin = "00"
+                    } else if (root.drink-timer - Math.mod(root.drink-timer, 60)) / 60 <= 9 {
+                        drinkTimerMin = "0\{(root.drink-timer - Math.mod(root.drink-timer, 60)) / 60}"
+                    } else {
+                        drinkTimerMin = (root.drink-timer - Math.mod(root.drink-timer, 60)) / 60
+                    }
+                    if Math.mod(root.drink-timer, 60) <= 9 {
+                        drinkTimerSec = "0\{Math.mod(root.drink-timer, 60)}"
+                    } else {
+                        drinkTimerSec = Math.mod(root.drink-timer, 60)
+                    }
+                    drink-tick(root.drink-timer, root.drink-button-clicked)
+                }
+            }
+
+            Text {
+                text: "\{drinkTimerMin} : \{drinkTimerSec}";
+                font-size: 36pt;
+                horizontal-alignment: center;
+            }
+        }
+
+        Row {
+            Button {
+                text: "Looking away";
+                height: 75px;
+                primary: true;
+                padding: 25px;
+                clicked => {
+                    eye-logic()
+                }
+            }
+
+            Button {
+                text: "I have drunk";
+                height: 75px;
+                primary: true;
+                padding: 25px;
+                clicked => {
+                    drink-logic()
+                }
+            }
+        }
+    }
+}
